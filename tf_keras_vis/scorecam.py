@@ -160,10 +160,14 @@ class Scorecam(ModelVisualization):
         # (channels * samples, logits) -> (channels, samples, logits)
         preds = (np.reshape(prediction, (channels, nsamples, prediction.shape[-1]))
                  for prediction in listify(preds))
-
+        # (channels, samples, logits) -> (samples, logits,channels) score function receives (samples,logits,...)
+        preds = (np.transpose(prediction,axes=[1,2,0])
+                for prediction in preds)
         # Calculating weights
-        weights = ([score(K.softmax(p)) for p in prediction]
-                   for score, prediction in zip(scores, preds))
+        weights = ([score(K.softmax(p,axis=-1)) for p in prediction] 
+                   for score, prediction in zip(scores, preds)) # Softmax over channels 
+        weights = (np.transpose(w,axes=[2,0,1])
+                   for w in weights) #Recover compatibility for next computations 
         weights = ([self._validate_weight(s, nsamples) for s in w] for w in weights)
         weights = (np.array(w, dtype=np.float32) for w in weights)
         weights = (np.reshape(w, (channels, nsamples, -1)) for w in weights)
