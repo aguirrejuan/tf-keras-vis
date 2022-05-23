@@ -20,6 +20,7 @@ class Layercam(Gradcam):
                  penultimate_layer=None,
                  seek_penultimate_conv_layer=True,
                  gradient_modifier=lambda grads: K.relu(grads),
+                 weights_modifier=lambda grads: grads,
                  activation_modifier=lambda cam: K.relu(cam),
                  training=False,
                  expand_cam=True,

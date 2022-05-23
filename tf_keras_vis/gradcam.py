@@ -24,6 +24,9 @@ class Gradcam(ModelVisualization):
                  penultimate_layer=None,
                  seek_penultimate_conv_layer=True,
                  gradient_modifier=None,
+                 weights_modifier=lambda grads: K.mean(grads, 
+                                                axis=tuple(range(grads.ndim)[1:-1]), 
+                                                keepdims=True),
                  activation_modifier=lambda cam: K.relu(cam),
                  training=False,
                  expand_cam=True,
@@ -104,7 +107,7 @@ class Gradcam(ModelVisualization):
 
         if gradient_modifier is not None:
             grads = gradient_modifier(grads)
-        weights = K.mean(grads, axis=tuple(range(grads.ndim)[1:-1]), keepdims=True)
+        weights = weights_modifier(grads)
         cam = np.sum(np.multiply(penultimate_output, weights), axis=-1)
         if activation_modifier is not None:
             cam = activation_modifier(cam)
